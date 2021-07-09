@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from app import engine
-from flask import Response, jsonify
+from flask import Response, jsonify, request
 
 @engine.route("/")
 def root_node():
@@ -21,10 +21,19 @@ def endpoint_node(endpoint=""):
     endpoint = endpoint.strip()
     if not endpoint:
         return jsonify({
-            "error":"Command is not valid.",
-            "data":None
+            "error":"Command is not valid."
         })
 
-    return jsonify({
-        "data":[]
-    })
+    from .endpoint import get_handler
+
+    key = "{}_api".format(endpoint)
+    handle = get_handler(key)
+
+    if handle is None:
+        return jsonify({
+            "error":"Endpoint '{}' is not defined.".format(endpoint)
+        })
+
+    retVal = handle(request)
+
+    return jsonify(retVal)
