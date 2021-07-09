@@ -5,6 +5,18 @@ from app import db
 from datetime import datetime
 from ..models.note import Note
 
+def _get_request(request=None):
+    if request is None:
+        return None
+    if request.method == "POST":
+        if request.content_type and ("application/json" in request.content_type):
+            req = request.get_json()
+        else:
+            req = request.form
+    elif request.method == "GET":
+        req = request.args
+    return req
+
 def content_hash(content=""):
     m = hashlib.md5()
     m.update(content.encode())
@@ -16,13 +28,7 @@ def _note_api_handle(request=None):
             "data":[]
         }
 
-    if request.method == "POST":
-        if request.content_type and ("application/json" in request.content_type):
-            req = request.get_json()
-        else:
-            req = request.form
-    elif request.method == "GET":
-        req = request.args
+    req = _get_request(request)
 
     id = req.get("id", "").strip()
     content = req.get("content","").strip()
@@ -101,13 +107,7 @@ def _note_remove_handle(request=None):
             "data":[]
         }
 
-    if request.method == "POST":
-        if request.content_type and ("application/json" in request.content_type):
-            req = request.get_json()
-        else:
-            req = request.form
-    elif request.method == "GET":
-        req = request.args
+    req = _get_request(request)
 
     if req.get("id","").strip():
         id = req.get("id",-1, int)

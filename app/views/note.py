@@ -2,7 +2,7 @@
 
 from app import engine
 from flask import Response, jsonify, request
-from .endpoint import get_handler
+from .endpoint import get_handler, _get_request
 
 @engine.route("/")
 def root_node():
@@ -42,13 +42,7 @@ def endpoint_node(endpoint=""):
 def remove_node(endpoint=""):
     endpoint = endpoint.strip()
     if not endpoint:
-        if request.method == "POST":
-            if request.content_type and ("application/json" in request.content_type):
-                req = request.get_json()
-            else:
-                req = request.form
-        elif request.method == "GET":
-            req = request.args
+        req = _get_request(request)
 
         endpoint = req.get("endpoint","").strip()
         if not endpoint:
