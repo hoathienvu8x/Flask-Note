@@ -22,6 +22,7 @@ Clone the repository
 mkdir ~/flask-apps && cd ~/flask-apps
 git clone https://github.com/hoathienvu8x/Flask-Note notes
 cd notes && mkdir app/data
+pip3 install -r requirements.txt
 ./note initdb
 ```
 
