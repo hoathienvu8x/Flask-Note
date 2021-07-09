@@ -2,6 +2,7 @@
 
 from app import engine
 from flask import Response, jsonify, request
+from .endpoint import get_handler
 
 @engine.route("/")
 def root_node():
@@ -24,9 +25,38 @@ def endpoint_node(endpoint=""):
             "error":"Command is not valid."
         })
 
-    from .endpoint import get_handler
-
     key = "{}_api".format(endpoint)
+    handle = get_handler(key)
+
+    if handle is None:
+        return jsonify({
+            "error":"Endpoint '{}' is not defined.".format(endpoint)
+        })
+
+    retVal = handle(request)
+
+    return jsonify(retVal)
+
+@engine.route("/api/remove", methods=["GET","POST"])
+@engine.route("/api/<string:endpoint>/remove", methods=["GET","POST"])
+def remove_node(endpoint=""):
+    endpoint = endpoint.strip()
+    if not endpoint:
+        if request.method == "POST":
+            if request.content_type and ("application/json" in request.content_type):
+                req = request.get_json()
+            else:
+                req = request.form
+        elif request.method == "GET":
+            req = request.args
+
+        endpoint = req.get("endpoint","").strip()
+        if not endpoint:
+            return jsonify({
+                "error":"Command is not valid."
+            })
+
+    key = "{}_remove".format(endpoint)
     handle = get_handler(key)
 
     if handle is None:

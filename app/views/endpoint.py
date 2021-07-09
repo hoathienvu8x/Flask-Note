@@ -95,8 +95,70 @@ def _note_api_handle(request=None):
             "error":"Could not {} note, error: \"{}\"".format("update" if id > 0 else "add", e)
         }
 
+def _note_remove_handle(request=None):
+    if request is None:
+        return {
+            "data":[]
+        }
+
+    if request.method == "POST":
+        if request.content_type and ("application/json" in request.content_type):
+            req = request.get_json()
+        else:
+            req = request.form
+    elif request.method == "GET":
+        req = request.args
+
+    if req.get("id","").strip():
+        id = req.get("id",-1, int)
+        if id <= 0:
+            return {
+                "error":"ID ({}) is not valid".format(id)
+            }
+        note = Note.query.get(id)
+        if note is None:
+            return {
+                "error": "Note is not exists"
+            }
+        node = note.slug
+        db.session.delete(note)
+        try:
+            db.session.commit()
+            return {
+                "message":"Note node '{}' removed".format(node)
+            }
+        except Exception as e:
+            db.session.rollback()
+            return {
+                "error":"Could not remove note node '{}', error: \"{}\"".format(node,e),
+            }
+
+    node = req.get("node","").strip()
+    if not node:
+        return {
+            "error":"Node is not valid"
+        }
+        
+    note = Note.query.filter(Note.slug == node).first()
+    if not bool(note):
+        return {
+            "error": "Note node '{}' is not exists".format(node)
+        }
+    db.session.delete(note)
+    try:
+        db.session.commit()
+        return {
+            "message":"Note node '{}' removed".format(node)
+        }
+    except Exception as e:
+        db.session.rollback()
+        return {
+            "error":"Could not remove note node '{}', error: \"{}\"".format(node, e),
+        }
+
 endpoints = {
-    "note_api" : _note_api_handle
+    "note_api" : _note_api_handle,
+    "note_remove" : _note_remove_handle
 }
 
 def get_handler(key=''):
