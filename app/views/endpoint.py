@@ -156,6 +156,24 @@ def _note_remove_handle(request=None):
             "error":"Could not remove note node '{}', error: \"{}\"".format(node, e),
         }
 
+def _note_custom_dict(note, fields):
+    item = {}
+    for i in range(len(fields)):
+        k = fields[i]
+        if k == "slug" or k == "node":
+            item["node"] = note.slug
+        elif k == "timestamp":
+            item[k] = str(note.modified).replace(" ","T") if note.modified > note.publish else str(note.publish).replace(" ","T")
+        elif hasattr(note, k):
+            item[k] = getattr(note,k)
+            if k == "modified" and note.modified < note.publish:
+                item[k] = None
+            if k == "modified" or k == "publish":
+                if item[k] is not None:
+                    item[k] = str(item[k]).replace(" ","T")
+
+    return item
+
 def _note_query_handle(request=None):
     if request is None:
         return {
@@ -168,6 +186,33 @@ def _note_query_handle(request=None):
     action = action.lower()
     if not (action in ["get","search"]):
         action = "get"
+
+    if req.get("fields","").strip():
+        fields = [ v for v in req.get("fields","").strip().split(",") if v.strip() ]
+    else:
+        fields = ["node", "content", "status", "timestamp"]
+
+    page = req.get("page","1").strip()
+    if not page:
+        page = "1"
+
+    try:
+        page = int(page)
+        if page <= 0:
+            page = 1
+    except:
+        page = 1
+
+    limit = req.get("limit","5").strip()
+    if not limit:
+        limit = "5"
+
+    try:
+        limit = int(limit)
+        if limit <= 0:
+            limit = 5
+    except:
+        limit = 5
 
     if action == "search":
         keyword = req.get("s","").strip()
@@ -185,14 +230,9 @@ def _note_query_handle(request=None):
             if state != "all":
                 query = query.filter(Note.status == state)
 
-        query = query.order_by(Note.publish.desc()).all()
+        query = query.order_by(Note.publish.desc()).paginate(page, limit, error_out=False)
         return {
-            "data":[ {
-                "node": note.slug,
-                "content":note.content,
-                "status":note.status,
-                "timestamp": str(note.modified).replace(" ","T") if note.modified > note.publish else str(note.publish).replace(" ","T")
-            } for note in query ]
+            "data":[ _note_custom_dict(note, fields) for note in query.items ]
         }
 
     node = req.get("node","").strip()
@@ -204,12 +244,7 @@ def _note_query_handle(request=None):
             }
 
         return {
-            "data":{
-                "node": note.slug,
-                "content":note.content,
-                "status":note.status,
-                "timestamp": str(note.modified).replace(" ","T") if note.modified > note.publish else str(note.publish).replace(" ","T")
-            }
+            "data":_note_custom_dict(note, fields)
         }
 
     query = Note.query
@@ -221,14 +256,9 @@ def _note_query_handle(request=None):
         if state != "all":
             query = query.filter(Note.status == state)
 
-    query = query.order_by(Note.publish.desc()).all()
+    query = query.order_by(Note.publish.desc()).paginate(page, limit, error_out=False)
     return {
-        "data":[ {
-            "node": note.slug,
-            "content":note.content,
-            "status":note.status,
-            "timestamp": str(note.modified).replace(" ","T") if note.modified > note.publish else str(note.publish).replace(" ","T")
-        } for note in query ]
+        "data":[ _note_custom_dict(note,fields) for note in query.items ]
     }
 
 endpoints = {
