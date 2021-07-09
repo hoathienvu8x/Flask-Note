@@ -81,6 +81,17 @@ On success reponse `JSON` object key is `data`, or `JSON` object key `error`
 if get single `Note` the `data` is object of `Note` else `data` is
 array of `Note`
 
+## Updated
+
+On route `/api/note/query` add support to custom response object and paging
+
+Add params `page`, `limit` type is `Int` and must be greater than 0, `page`
+default value is `1` and `limit` default value is `5`
+
+Add param `fields` type is `String` the fields to response of object separator
+`,` default `["node", "content", "status", "timestamp"]`
+that mean `fields=node,content,status,timestamp`
+
 ## Client
 
 This application using `curl` command or `fetch` API of javascript to send
