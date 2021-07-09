@@ -156,9 +156,85 @@ def _note_remove_handle(request=None):
             "error":"Could not remove note node '{}', error: \"{}\"".format(node, e),
         }
 
+def _note_query_handle(request=None):
+    if request is None:
+        return {
+            "data":[]
+        }
+    req = _get_request(request)
+    action = req.get("action","get").strip()
+    if not action:
+        action = "get"
+    action = action.lower()
+    if not (action in ["get","search"]):
+        action = "get"
+
+    if action == "search":
+        keyword = req.get("s","").strip()
+        if not keyword:
+            return {
+                "error":"Keyword is required"
+            }
+
+        query = Note.query.filter(Note.content.ilike("%{}%".format(keyword)))
+        state = req.get("state","").strip()
+        if state:
+            state = state.lower()
+            if not (state in ["all","publish","pending","draft","trash"]):
+                state = "publish"
+            if state != "all":
+                query = query.filter(Note.status == state)
+
+        query = query.order_by(Note.publish.desc()).all()
+        return {
+            "data":[ {
+                "node": note.slug,
+                "content":note.content,
+                "status":note.status,
+                "timestamp": str(note.modified).replace(" ","T") if note.modified > note.publish else str(note.publish).replace(" ","T")
+            } for note in query ]
+        }
+
+    node = req.get("node","").strip()
+    if node:
+        note = Note.query.filter(Note.slug == node).first()
+        if not bool(note):
+            return {
+                "error" : "Note is not exists"
+            }
+
+        return {
+            "data":{
+                "node": note.slug,
+                "content":note.content,
+                "status":note.status,
+                "timestamp": str(note.modified).replace(" ","T") if note.modified > note.publish else str(note.publish).replace(" ","T")
+            }
+        }
+
+    query = Note.query
+    state = req.get("state","").strip()
+    if state:
+        state = state.lower()
+        if not (state in ["all","publish","pending","draft","trash"]):
+            state = "publish"
+        if state != "all":
+            query = query.filter(Note.status == state)
+
+    query = query.order_by(Note.publish.desc()).all()
+    return {
+        "data":[ {
+            "node": note.slug,
+            "content":note.content,
+            "status":note.status,
+            "timestamp": str(note.modified).replace(" ","T") if note.modified > note.publish else str(note.publish).replace(" ","T")
+        } for note in query ]
+    }
+
 endpoints = {
     "note_api" : _note_api_handle,
-    "note_remove" : _note_remove_handle
+    "note_remove" : _note_remove_handle,
+    "note_query" : _note_query_handle
 }
 
 def get_handler(key=''):

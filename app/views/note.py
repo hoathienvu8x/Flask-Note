@@ -61,3 +61,28 @@ def remove_node(endpoint=""):
     retVal = handle(request)
 
     return jsonify(retVal)
+
+@engine.route("/api/query", methods=["GET","POST"])
+@engine.route("/api/<string:endpoint>/query", methods=["GET","POST"])
+def query_node(endpoint=""):
+    endpoint = endpoint.strip()
+    if not endpoint:
+        req = _get_request(request)
+
+        endpoint = req.get("endpoint","").strip()
+        if not endpoint:
+            return jsonify({
+                "error":"Command is not valid."
+            })
+
+    key = "{}_query".format(endpoint)
+    handle = get_handler(key)
+
+    if handle is None:
+        return jsonify({
+            "error":"Endpoint '{}' is not defined.".format(endpoint)
+        })
+
+    retVal = handle(request)
+
+    return jsonify(retVal)
