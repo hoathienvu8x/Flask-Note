@@ -22,6 +22,24 @@ def content_hash(content=""):
     m.update(content.encode())
     return m.hexdigest()
 
+def _note_custom_dict(note, fields):
+    item = {}
+    for i in range(len(fields)):
+        k = fields[i]
+        if k == "slug" or k == "node":
+            item["node"] = note.slug
+        elif k == "timestamp":
+            item[k] = str(note.modified).replace(" ","T") if note.modified > note.publish else str(note.publish).replace(" ","T")
+        elif hasattr(note, k):
+            item[k] = getattr(note,k)
+            if k == "modified" and note.modified < note.publish:
+                item[k] = None
+            if k == "modified" or k == "publish":
+                if item[k] is not None:
+                    item[k] = str(item[k]).replace(" ","T")
+
+    return item
+
 def _note_api_handle(request=None):
     if request is None:
         return {
@@ -88,12 +106,7 @@ def _note_api_handle(request=None):
     try:
         db.session.commit()
         return {
-            "data": {
-                "node": note.slug,
-                "content":note.content,
-                "status":note.status,
-                "timestamp": str(note.modified).replace(" ","T") if note.modified > note.publish else str(note.publish).replace(" ","T")
-            }
+            "data": _note_custom_dict(note, ["node", "content", "status", "timestamp"])
         }
     except Exception as e:
         db.session.rollback()
@@ -155,24 +168,6 @@ def _note_remove_handle(request=None):
         return {
             "error":"Could not remove note node '{}', error: \"{}\"".format(node, e),
         }
-
-def _note_custom_dict(note, fields):
-    item = {}
-    for i in range(len(fields)):
-        k = fields[i]
-        if k == "slug" or k == "node":
-            item["node"] = note.slug
-        elif k == "timestamp":
-            item[k] = str(note.modified).replace(" ","T") if note.modified > note.publish else str(note.publish).replace(" ","T")
-        elif hasattr(note, k):
-            item[k] = getattr(note,k)
-            if k == "modified" and note.modified < note.publish:
-                item[k] = None
-            if k == "modified" or k == "publish":
-                if item[k] is not None:
-                    item[k] = str(item[k]).replace(" ","T")
-
-    return item
 
 def _note_query_handle(request=None):
     if request is None:
