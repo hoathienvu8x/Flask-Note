@@ -232,7 +232,10 @@ def _note_query_handle(request=None):
 
         query = query.order_by(Note.publish.desc()).paginate(page, limit, error_out=False)
         return {
-            "data":[ _note_custom_dict(note, fields) for note in query.items ]
+            "num_results" : len(query.items),
+            "data":[ _note_custom_dict(note, fields) for note in query.items ],
+            "page" : query.page,
+            "total_pages" : query.pages
         }
 
     node = req.get("node","").strip()
@@ -258,7 +261,10 @@ def _note_query_handle(request=None):
 
     query = query.order_by(Note.publish.desc()).paginate(page, limit, error_out=False)
     return {
-        "data":[ _note_custom_dict(note,fields) for note in query.items ]
+        "num_results" : len(query.items),
+        "data":[ _note_custom_dict(note,fields) for note in query.items ],
+        "page" : query.page,
+        "total_pages" : query.pages
     }
 
 endpoints = {
