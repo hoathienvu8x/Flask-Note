@@ -93,6 +93,29 @@ Add param `fields` type is `String` the fields to response of object separator
 `,` default `["node", "content", "status", "timestamp"]`
 that mean `fields=node,content,status,timestamp`
 
+_2021-07-10 @10:34_
+
+Update route `/api/note/query` action `get` + `search` add three key that
+is `num_results`, `page`, `total_pages` because I want know exactly the mine query
+worked (current page, total results response and total pages results)
+
+The result of response will be
+
+```
+{
+  "num_results":1,
+  "data":[
+    {
+      "content":"I'm working on a ...",
+      "node":"ce8147bcc81e4d661b8c2f9b46e43531_1625886495",
+      "timestamp":"2021-07-10T10:40:15.547653"
+    }
+  ],
+  "page":1,
+  "total_pages":1
+}
+```
+
 ## Client
 
 This application using `curl` command or `fetch` API of javascript to send
