@@ -2,7 +2,19 @@
 
 from app import engine
 from flask import Response, jsonify, request
-from .endpoint import get_handler, _get_request
+from .endpoint import get_handler
+
+def _get_request(request=None):
+    if request is None:
+        return None
+    if request.method == "POST":
+        if request.content_type and ("application/json" in request.content_type):
+            req = request.get_json()
+        else:
+            req = request.form
+    elif request.method == "GET":
+        req = request.args
+    return req
 
 @engine.route("/")
 def root_node():
@@ -33,7 +45,9 @@ def endpoint_node(endpoint=""):
             "error":"Endpoint '{}' is not defined.".format(endpoint)
         })
 
-    retVal = handle(request)
+    args = _get_request(request)
+
+    retVal = handle(args)
 
     return jsonify(retVal)
 
@@ -42,9 +56,9 @@ def endpoint_node(endpoint=""):
 def remove_node(endpoint=""):
     endpoint = endpoint.strip()
     if not endpoint:
-        req = _get_request(request)
+        args = _get_request(request)
 
-        endpoint = req.get("endpoint","").strip()
+        endpoint = args.get("endpoint","").strip()
         if not endpoint:
             return jsonify({
                 "error":"Command is not valid."
@@ -58,7 +72,9 @@ def remove_node(endpoint=""):
             "error":"Endpoint '{}' is not defined.".format(endpoint)
         })
 
-    retVal = handle(request)
+    args = _get_request(request)
+
+    retVal = handle(args)
 
     return jsonify(retVal)
 
@@ -67,9 +83,9 @@ def remove_node(endpoint=""):
 def query_node(endpoint=""):
     endpoint = endpoint.strip()
     if not endpoint:
-        req = _get_request(request)
+        args = _get_request(request)
 
-        endpoint = req.get("endpoint","").strip()
+        endpoint = args.get("endpoint","").strip()
         if not endpoint:
             return jsonify({
                 "error":"Command is not valid."
@@ -83,6 +99,8 @@ def query_node(endpoint=""):
             "error":"Endpoint '{}' is not defined.".format(endpoint)
         })
 
-    retVal = handle(request)
+    args = _get_request(request)
+
+    retVal = handle(args)
 
     return jsonify(retVal)

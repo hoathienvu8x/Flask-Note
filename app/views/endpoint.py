@@ -5,18 +5,6 @@ from app import db
 from datetime import datetime
 from ..models.note import Note
 
-def _get_request(request=None):
-    if request is None:
-        return None
-    if request.method == "POST":
-        if request.content_type and ("application/json" in request.content_type):
-            req = request.get_json()
-        else:
-            req = request.form
-    elif request.method == "GET":
-        req = request.args
-    return req
-
 def content_hash(content=""):
     m = hashlib.md5()
     m.update(content.encode())
@@ -40,19 +28,17 @@ def _note_custom_dict(note, fields):
 
     return item
 
-def _note_api_handle(request=None):
-    if request is None:
+def _note_api_handle(args=None):
+    if args is None:
         return {
             "data":[]
         }
 
-    req = _get_request(request)
-
-    id = req.get("id", "").strip()
-    content = req.get("content","").strip()
-    status = req.get("status","").strip()
-    url = req.get("url","").strip()
-    name = req.get("name","").strip()
+    id = args.get("id", "").strip()
+    content = args.get("content","").strip()
+    status = args.get("status","").strip()
+    url = args.get("url","").strip()
+    name = args.get("name","").strip()
 
     if not content:
         return {
@@ -114,16 +100,14 @@ def _note_api_handle(request=None):
             "error":"Could not {} note, error: \"{}\"".format("update" if id > 0 else "add", e)
         }
 
-def _note_remove_handle(request=None):
-    if request is None:
+def _note_remove_handle(args=None):
+    if args is None:
         return {
             "data":[]
         }
 
-    req = _get_request(request)
-
-    if req.get("id","").strip():
-        id = req.get("id",-1, int)
+    if args.get("id","").strip():
+        id = args.get("id",-1, int)
         if id <= 0:
             return {
                 "error":"ID ({}) is not valid".format(id)
@@ -146,7 +130,7 @@ def _note_remove_handle(request=None):
                 "error":"Could not remove note node '{}', error: \"{}\"".format(node,e),
             }
 
-    node = req.get("node","").strip()
+    node = args.get("node","").strip()
     if not node:
         return {
             "error":"Node is not valid"
@@ -169,25 +153,25 @@ def _note_remove_handle(request=None):
             "error":"Could not remove note node '{}', error: \"{}\"".format(node, e),
         }
 
-def _note_query_handle(request=None):
-    if request is None:
+def _note_query_handle(args=None):
+    if args is None:
         return {
             "data":[]
         }
-    req = _get_request(request)
-    action = req.get("action","get").strip()
+
+    action = args.get("action","get").strip()
     if not action:
         action = "get"
     action = action.lower()
     if not (action in ["get","search"]):
         action = "get"
 
-    if req.get("fields","").strip():
-        fields = [ v for v in req.get("fields","").strip().split(",") if v.strip() ]
+    if args.get("fields","").strip():
+        fields = [ v for v in args.get("fields","").strip().split(",") if v.strip() ]
     else:
         fields = ["node", "content", "status", "timestamp"]
 
-    page = req.get("page","1").strip()
+    page = args.get("page","1").strip()
     if not page:
         page = "1"
 
@@ -198,7 +182,7 @@ def _note_query_handle(request=None):
     except:
         page = 1
 
-    limit = req.get("limit","5").strip()
+    limit = args.get("limit","5").strip()
     if not limit:
         limit = "5"
 
@@ -210,14 +194,14 @@ def _note_query_handle(request=None):
         limit = 5
 
     if action == "search":
-        keyword = req.get("s","").strip()
+        keyword = args.get("s","").strip()
         if not keyword:
             return {
                 "error":"Keyword is required"
             }
 
         query = Note.query.filter(Note.content.ilike("%{}%".format(keyword)))
-        state = req.get("state","").strip()
+        state = args.get("state","").strip()
         if state:
             state = state.lower()
             if not (state in ["all","publish","pending","draft","trash"]):
@@ -233,7 +217,7 @@ def _note_query_handle(request=None):
             "total_pages" : query.pages
         }
 
-    node = req.get("node","").strip()
+    node = args.get("node","").strip()
     if node:
         note = Note.query.filter(Note.slug == node).first()
         if not bool(note):
@@ -246,7 +230,7 @@ def _note_query_handle(request=None):
         }
 
     query = Note.query
-    state = req.get("state","").strip()
+    state = args.get("state","").strip()
     if state:
         state = state.lower()
         if not (state in ["all","publish","pending","draft","trash"]):
