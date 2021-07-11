@@ -124,6 +124,14 @@ dict instance
 
 **Switch branch `master` to `note-gui` and development template + gui**
 
+_2021-07-11 @18:20_
+
+1. Add node `/api/node/recents` to get all `Notes` 24 hours ago
+2. Add node `/api/node/hits` to get all `Notes` load to read
+
+Update reponse list to short content data on query get list of notes, set
+views when query note single
+
 ## Client
 
 This application using `curl` command or `fetch` API of javascript to send

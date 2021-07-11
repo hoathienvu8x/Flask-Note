@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import hashlib
+import hashlib, re
 from app import db
 from datetime import datetime, timedelta
 from ..models.note import Note
@@ -10,7 +10,34 @@ def content_hash(content=""):
     m.update(content.encode())
     return m.hexdigest()
 
-def _note_custom_dict(note, fields):
+def _no_accent(s):
+    specials = ["&amp;","&lt;","&gt;","&lsquo;","&rsquo;","&ldquo;","&rdquo;","&hellip;","&ndash;","&mdash;","&quot;","&#39;","&nbsp;","&#91;","&#93;","&#32;"]
+    for i in range(len(specials)):
+        s = re.sub(specials[i],' ', s)
+    return s
+
+def _the_short_content(s, length=160):
+    s = _no_accent(s)
+    s = re.sub(r'[\W_]+', ' ', s)
+    s = re.sub(r' +',r' ',s)
+    s = s.strip()
+    if len(s) <= length:
+        return s
+
+    _length = len(s)
+    words = s.split(" ")
+    s = ""
+    for word in words:
+        word = word.strip()
+        if word:
+            s += word + " "
+            if len(s.strip()) >= length:
+                if len(s) < _length:
+                    return s.strip() + "..."
+
+    return s
+
+def _note_custom_dict(note, fields, short=False):
     item = {}
     for i in range(len(fields)):
         k = fields[i]
@@ -25,6 +52,9 @@ def _note_custom_dict(note, fields):
             if k == "modified" or k == "publish":
                 if item[k] is not None:
                     item[k] = str(item[k]).replace(" ","T")
+            elif k == "content":
+                if short == True:
+                    item[k] = _the_short_content(s=item[k])
 
     return item
 
@@ -220,7 +250,7 @@ def _note_query_handle(args=None):
         query = query.order_by(Note.publish.desc()).paginate(page, limit, error_out=False)
         return {
             "num_results" : len(query.items),
-            "data":[ _note_custom_dict(note, fields) for note in query.items ],
+            "data":[ _note_custom_dict(note, fields, True) for note in query.items ],
             "page" : query.page,
             "total_pages" : query.pages
         }
@@ -233,6 +263,14 @@ def _note_query_handle(args=None):
                 "error" : "Note is not exists"
             }
 
+        views = note.views + 1 if note.views is not None else 1
+        note.views = views
+
+        try:
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+
         return {
             "data":_note_custom_dict(note, fields)
         }
@@ -244,7 +282,7 @@ def _note_query_handle(args=None):
     query = query.order_by(Note.publish.desc()).paginate(page, limit, error_out=False)
     return {
         "num_results" : len(query.items),
-        "data":[ _note_custom_dict(note,fields) for note in query.items ],
+        "data":[ _note_custom_dict(note,fields, True) for note in query.items ],
         "page" : query.page,
         "total_pages" : query.pages
     }
@@ -265,7 +303,7 @@ def _note_recents_handle(args=None):
     query = query.order_by(Note.publish.desc()).paginate(page, limit, error_out=False)
     return {
         "num_results" : len(query.items),
-        "data":[ _note_custom_dict(note,fields) for note in query.items ],
+        "data":[ _note_custom_dict(note,fields, True) for note in query.items ],
         "page" : query.page,
         "total_pages" : query.pages
     }
@@ -285,7 +323,7 @@ def _note_hits_handle(args=None):
     query = query.order_by(Note.views.desc()).paginate(page, limit, error_out=False)
     return {
         "num_results" : len(query.items),
-        "data":[ _note_custom_dict(note,fields) for note in query.items ],
+        "data":[ _note_custom_dict(note,fields, True) for note in query.items ],
         "page" : query.page,
         "total_pages" : query.pages
     }
