@@ -28,6 +28,44 @@ def _note_custom_dict(note, fields):
 
     return item
 
+def _get_note_optional_args(args):
+    if args.get("fields","").strip():
+        fields = [ v for v in args.get("fields","").strip().split(",") if v.strip() ]
+    else:
+        fields = ["node", "content", "status", "timestamp"]
+
+    page = args.get("page","1").strip()
+    if not page:
+        page = "1"
+
+    try:
+        page = int(page)
+        if page <= 0:
+            page = 1
+    except:
+        page = 1
+
+    limit = args.get("limit","5").strip()
+    if not limit:
+        limit = "5"
+
+    try:
+        limit = int(limit)
+        if limit <= 0:
+            limit = 5
+    except:
+        limit = 5
+
+    state = args.get("state","").strip()
+    if state:
+        state = state.lower()
+        if not (state in ["all","publish","pending","draft","trash"]):
+            state = "publish"
+    else:
+        state = "all"
+
+    return (page, limit, state, fields)
+
 def _note_api_handle(args=None):
     if args is None:
         return {
@@ -166,32 +204,7 @@ def _note_query_handle(args=None):
     if not (action in ["get","search"]):
         action = "get"
 
-    if args.get("fields","").strip():
-        fields = [ v for v in args.get("fields","").strip().split(",") if v.strip() ]
-    else:
-        fields = ["node", "content", "status", "timestamp"]
-
-    page = args.get("page","1").strip()
-    if not page:
-        page = "1"
-
-    try:
-        page = int(page)
-        if page <= 0:
-            page = 1
-    except:
-        page = 1
-
-    limit = args.get("limit","5").strip()
-    if not limit:
-        limit = "5"
-
-    try:
-        limit = int(limit)
-        if limit <= 0:
-            limit = 5
-    except:
-        limit = 5
+    page, limit, state, fields = _get_note_optional_args(args)
 
     if action == "search":
         keyword = args.get("s","").strip()
@@ -201,13 +214,8 @@ def _note_query_handle(args=None):
             }
 
         query = Note.query.filter(Note.content.ilike("%{}%".format(keyword)))
-        state = args.get("state","").strip()
-        if state:
-            state = state.lower()
-            if not (state in ["all","publish","pending","draft","trash"]):
-                state = "publish"
-            if state != "all":
-                query = query.filter(Note.status == state)
+        if state != "all":
+            query = query.filter(Note.status == state)
 
         query = query.order_by(Note.publish.desc()).paginate(page, limit, error_out=False)
         return {
@@ -230,13 +238,8 @@ def _note_query_handle(args=None):
         }
 
     query = Note.query
-    state = args.get("state","").strip()
-    if state:
-        state = state.lower()
-        if not (state in ["all","publish","pending","draft","trash"]):
-            state = "publish"
-        if state != "all":
-            query = query.filter(Note.status == state)
+    if state != "all":
+        query = query.filter(Note.status == state)
 
     query = query.order_by(Note.publish.desc()).paginate(page, limit, error_out=False)
     return {
@@ -252,42 +255,12 @@ def _note_recents_handle(args=None):
             "data":[]
         }
 
-    page = args.get("page","1").strip()
-    if not page:
-        page = "1"
-
-    try:
-        page = int(page)
-        if page <= 0:
-            page = 1
-    except:
-        page = 1
-
-    limit = args.get("limit","5").strip()
-    if not limit:
-        limit = "5"
-
-    try:
-        limit = int(limit)
-        if limit <= 0:
-            limit = 5
-    except:
-        limit = 5
-
-    if args.get("fields","").strip():
-        fields = [ v for v in args.get("fields","").strip().split(",") if v.strip() ]
-    else:
-        fields = ["node", "content", "status", "timestamp"]
+    page, limit, state, fields = _get_note_optional_args(args)
 
     since = datetime.now() - timedelta(hours=24)
     query = Note.query.filter(Note.publish >= since)
-    state = args.get("state","").strip()
-    if state:
-        state = state.lower()
-        if not (state in ["all","publish","pending","draft","trash"]):
-            state = "publish"
-        if state != "all":
-            query = query.filter(Note.status == state)
+    if state != "all":
+        query = query.filter(Note.status == state)
 
     query = query.order_by(Note.publish.desc()).paginate(page, limit, error_out=False)
     return {
@@ -303,41 +276,11 @@ def _note_hits_handle(args=None):
             "data":[]
         }
 
-    page = args.get("page","1").strip()
-    if not page:
-        page = "1"
-
-    try:
-        page = int(page)
-        if page <= 0:
-            page = 1
-    except:
-        page = 1
-
-    limit = args.get("limit","5").strip()
-    if not limit:
-        limit = "5"
-
-    try:
-        limit = int(limit)
-        if limit <= 0:
-            limit = 5
-    except:
-        limit = 5
-
-    if args.get("fields","").strip():
-        fields = [ v for v in args.get("fields","").strip().split(",") if v.strip() ]
-    else:
-        fields = ["node", "content", "status", "timestamp"]
+    page, limit, state, fields = _get_note_optional_args(args)
 
     query = Note.query.filter(Note.views > 0)
-    state = args.get("state","").strip()
-    if state:
-        state = state.lower()
-        if not (state in ["all","publish","pending","draft","trash"]):
-            state = "publish"
-        if state != "all":
-            query = query.filter(Note.status == state)
+    if state != "all":
+        query = query.filter(Note.status == state)
 
     query = query.order_by(Note.views.desc()).paginate(page, limit, error_out=False)
     return {
