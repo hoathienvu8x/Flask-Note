@@ -104,3 +104,57 @@ def query_node(endpoint=""):
     retVal = handle(args)
 
     return jsonify(retVal)
+
+@engine.route("/api/recents", methods=["GET","POST"])
+@engine.route("/api/<string:endpoint>/recents", methods=["GET","POST"])
+def recent_node(endpoint=""):
+    endpoint = endpoint.strip()
+    if not endpoint:
+        args = _get_request(request)
+
+        endpoint = args.get("endpoint","").strip()
+        if not endpoint:
+            return jsonify({
+                "error":"Command is not valid."
+            })
+
+    key = "{}_recents".format(endpoint)
+    handle = get_handler(key)
+
+    if handle is None:
+        return jsonify({
+            "error":"Endpoint '{}' is not defined.".format(endpoint)
+        })
+
+    args = _get_request(request)
+
+    retVal = handle(args)
+
+    return jsonify(retVal)
+
+@engine.route("/api/hits", methods=["GET","POST"])
+@engine.route("/api/<string:endpoint>/hits", methods=["GET","POST"])
+def hit_node(endpoint=""):
+    endpoint = endpoint.strip()
+    if not endpoint:
+        args = _get_request(request)
+
+        endpoint = args.get("endpoint","").strip()
+        if not endpoint:
+            return jsonify({
+                "error":"Command is not valid."
+            })
+
+    key = "{}_hits".format(endpoint)
+    handle = get_handler(key)
+
+    if handle is None:
+        return jsonify({
+            "error":"Endpoint '{}' is not defined.".format(endpoint)
+        })
+
+    args = _get_request(request)
+
+    retVal = handle(args)
+
+    return jsonify(retVal)

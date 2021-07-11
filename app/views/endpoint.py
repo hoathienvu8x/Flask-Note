@@ -2,7 +2,7 @@
 
 import hashlib
 from app import db
-from datetime import datetime
+from datetime import datetime, timedelta
 from ..models.note import Note
 
 def content_hash(content=""):
@@ -246,10 +246,113 @@ def _note_query_handle(args=None):
         "total_pages" : query.pages
     }
 
+def _note_recents_handle(args=None):
+    if args is None:
+        return {
+            "data":[]
+        }
+
+    page = args.get("page","1").strip()
+    if not page:
+        page = "1"
+
+    try:
+        page = int(page)
+        if page <= 0:
+            page = 1
+    except:
+        page = 1
+
+    limit = args.get("limit","5").strip()
+    if not limit:
+        limit = "5"
+
+    try:
+        limit = int(limit)
+        if limit <= 0:
+            limit = 5
+    except:
+        limit = 5
+
+    if args.get("fields","").strip():
+        fields = [ v for v in args.get("fields","").strip().split(",") if v.strip() ]
+    else:
+        fields = ["node", "content", "status", "timestamp"]
+
+    since = datetime.now() - timedelta(hours=24)
+    query = Note.query.filter(Note.publish >= since)
+    state = args.get("state","").strip()
+    if state:
+        state = state.lower()
+        if not (state in ["all","publish","pending","draft","trash"]):
+            state = "publish"
+        if state != "all":
+            query = query.filter(Note.status == state)
+
+    query = query.order_by(Note.publish.desc()).paginate(page, limit, error_out=False)
+    return {
+        "num_results" : len(query.items),
+        "data":[ _note_custom_dict(note,fields) for note in query.items ],
+        "page" : query.page,
+        "total_pages" : query.pages
+    }
+
+def _note_hits_handle(args=None):
+    if args is None:
+        return {
+            "data":[]
+        }
+
+    page = args.get("page","1").strip()
+    if not page:
+        page = "1"
+
+    try:
+        page = int(page)
+        if page <= 0:
+            page = 1
+    except:
+        page = 1
+
+    limit = args.get("limit","5").strip()
+    if not limit:
+        limit = "5"
+
+    try:
+        limit = int(limit)
+        if limit <= 0:
+            limit = 5
+    except:
+        limit = 5
+
+    if args.get("fields","").strip():
+        fields = [ v for v in args.get("fields","").strip().split(",") if v.strip() ]
+    else:
+        fields = ["node", "content", "status", "timestamp"]
+
+    query = Note.query.filter(Note.views > 0)
+    state = args.get("state","").strip()
+    if state:
+        state = state.lower()
+        if not (state in ["all","publish","pending","draft","trash"]):
+            state = "publish"
+        if state != "all":
+            query = query.filter(Note.status == state)
+
+    query = query.order_by(Note.views.desc()).paginate(page, limit, error_out=False)
+    return {
+        "num_results" : len(query.items),
+        "data":[ _note_custom_dict(note,fields) for note in query.items ],
+        "page" : query.page,
+        "total_pages" : query.pages
+    }
+
 endpoints = {
     "note_api" : _note_api_handle,
     "note_remove" : _note_remove_handle,
-    "note_query" : _note_query_handle
+    "note_query" : _note_query_handle,
+    "note_recents" : _note_recents_handle,
+    "note_hits" : _note_hits_handle
 }
 
 def get_handler(key=''):
