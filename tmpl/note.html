@@ -1,0 +1,99 @@
+{% macro page_navi(endpoint, navi) %}
+    {% if navi %}
+        <nav class="page-navigation">
+        {% if navi.page > 4 %}
+            <a href="{{ url_for(endpoint, **kwargs) }}">&lt;&lt;</a>
+            <a href="{{ url_for(endpoint, page=(navi.page - 1), **kwargs) }}">&lt;</a>
+        {% else %}
+            {% if navi.start > 1 %}
+                <a href="{{ url_for(endpoint, **kwargs) }}">1</a>
+            {% endif %}
+        {% endif %}
+
+        {% for i in range(navi.start, navi.end + 1) %}
+            {% if i == navi.page %}
+                <span>{{ i }}</span>
+            {% elif i != 1 %}
+                <a href="{{ url_for(endpoint, page=i, **kwargs) }}">{{ i }}</a>
+            {% else %}
+                <a href="{{ url_for(endpoint, **kwargs) }}">{{ i }}</a>
+            {% endif %}
+        {% endfor %}
+
+        {% if navi.end + 1 < navi.pages %}
+            {% if navi.end + 1 == navi.pages - 1 %}
+                <a href="{{ url_for(endpoint, page=(navi.end + 1), **kwargs) }}">{{ navi.end + 1 }}</a>
+            {% else %}
+                <a href="{{ url_for(endpoint, page=(navi.page + 1), **kwargs) }}">&gt;</a>
+            {% endif %}
+        {% endif %}
+
+        {% if navi.pages - 4 > navi.end or navi.pages - 2 > navi.end %}
+            <a href="{{ url_for(endpoint, page=navi.pages, **kwargs) }}"> &gt;&gt; </a>
+        {% else %}
+            {% if navi.end != navi.pages %}
+                <a href="{{ url_for(endpoint, page=navi.pages, **kwargs) }}"> {{ navi.pages }} </a>
+            {% endif %}
+        {% endif %}
+        </nav>
+    {% endif %}
+{% endmacro %}
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>{% if site_title %}{{ site_title }}{% endif %}{% if page and page > 1 %} - {{ page }}{% endif %}</title>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>{% include 'style.css' %}</style>
+</head>
+<body>
+<nav>
+    <a href="{% if page and page > 1 %}{{ url_for(".gui_node",page=page) }}{% else %}{{ url_for(".gui_node") }}{% endif %}" id="notes"{% if endpoint and endpoint == "notes" %} class="actived"{% endif %}>Notes</a>
+    <a href="{% if page and page > 1 %}{{ url_for(".gui_recent_node",page=page) }}{% else %}{{ url_for(".gui_recent_node") }}{% endif %}" id="recents"{% if endpoint and endpoint == "recents" %} class="actived"{% endif %}>Recents</a>
+    <a href="{% if page and page > 1 %}{{ url_for(".gui_hit_node",page=page) }}{% else %}{{ url_for(".gui_hit_node") }}{% endif %}" id="hits"{% if endpoint and endpoint == "hits" %} class="actived"{% endif %}>Hits</a>
+</nav>
+{% if message %}
+<div class="message">
+    <p>{{ message }}</p>
+</div>
+{% endif %}
+{% if notes %}
+    <main>
+        {% for note in notes %}
+        <div class="note" id="note-{{ note.node }}">
+            {% if note.name %}
+            <h3>&copy; <a href="{{ note.url }}" target="detail_source">{{ note.name }}</a></h3>
+            {% endif %}
+            <blockquote>
+                {{ the_excerpt(note.content) }}
+            </blockquote>
+            <p>
+                <time datetime="{{ note.timestamp | safe }}">{{ note.timestamp | the_time }}</time>
+                <a href="{{ url_for(".gui_detail_node",node=note.node) }}" target="detail_note">&rarr;</a>
+            </p>
+        </div>
+        {% endfor %}
+        {% if navi %}
+            <div class="navi">
+                {% if endpoint and endpoint == "recents" %}
+                    page_navi(".gui_recent_node", navi)
+                {% elif endpoint and endpoint == "hits" %}
+                    page_navi(".gui_hit_node", navi)
+                {% else %}
+                    page_navi(".gui_node", navi)
+                {%endif %}
+            </div>
+        {% endif %}
+    </main>
+{% endif %}
+{% if note %}
+    <article id="note-{{ note.node }}">
+        {% if note.name %}
+        <h2>{{ note.name }}</h2>
+        {% endif %}
+        {{ note.content | markdown }}
+    </article>
+{% endif %}
+</body>
+</html>
