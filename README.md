@@ -132,6 +132,11 @@ _2021-07-11 @18:20_
 Update reponse list to short content data on query get list of notes, set
 views when query note single
 
+_2021-07-12 @00:10_
+
+To access gui using uri `/graph/` all display is simple, using markdown
+python to parse markdown text
+
 ## Client
 
 This application using `curl` command or `fetch` API of javascript to send
