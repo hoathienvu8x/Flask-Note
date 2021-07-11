@@ -116,6 +116,14 @@ The result of response will be
 }
 ```
 
+_2021-07-11 @16:14_
+
+Move params endpoint handle to dict param to easy call and pass data from
+code without request that mean change `request` to `args` with `args` is
+dict instance
+
+**Switch branch `master` to `note-gui` and development template + gui**
+
 ## Client
 
 This application using `curl` command or `fetch` API of javascript to send
