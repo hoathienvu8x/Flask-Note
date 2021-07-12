@@ -3,6 +3,7 @@
 import os
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
+from flask_htmlmin import HTMLMIN
 
 engine = Flask("app")
 
@@ -11,5 +12,6 @@ from .config import Configuration
 engine.config.from_object(Configuration)
 
 db = SQLAlchemy(engine,session_options={"autoflush": False})
+htmlmin = HTMLMIN(engine)
 
 from .views import *
