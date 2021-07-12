@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 
-from app import engine
+from app import engine, cache
 from flask import render_template, abort, request, redirect, url_for
-from .endpoint import _note_query_handle, _note_recents_handle, _note_hits_handle, _note_api_handle
+from .endpoint import _note_query_handle, _note_recents_handle, \
+_note_hits_handle, _note_api_handle, _note_remove_handle
 from .note import _get_request
 def get_list_pages(page, pages):
     start = page - 2
@@ -27,6 +28,7 @@ def get_list_pages(page, pages):
 
 @engine.route("/graph/")
 @engine.route("/graph/page/<int:page>/")
+@cache.memoize(20)
 def gui_node(page=1):
     argv = {
         "site_title": "Simple Flask Note"
@@ -47,7 +49,7 @@ def gui_node(page=1):
     navi = None
     if "total_pages" in retVal:
         if retVal["total_pages"] > 1:
-            navi = get_list_pages(restVal["page"], retVal["total_pages"])
+            navi = get_list_pages(retVal["page"], retVal["total_pages"])
 
     argv["navi"] = navi
     argv["page"] = page
@@ -57,6 +59,7 @@ def gui_node(page=1):
 
 @engine.route("/graph/recents/")
 @engine.route("/graph/recents/page/<int:page>/")
+@cache.memoize(20)
 def gui_recent_node(page=1):
     argv = {
         "site_title": "Simple Flask Note"
@@ -82,6 +85,7 @@ def gui_recent_node(page=1):
 
 @engine.route("/graph/hits/")
 @engine.route("/graph/hits/page/<int:page>/")
+@cache.memoize(20)
 def gui_hit_node(page=1):
     argv = {
         "site_title": "Simple Flask Note"
@@ -106,6 +110,7 @@ def gui_hit_node(page=1):
     return render_template('note.html', **argv)
 
 @engine.route("/note/<string:node>/")
+@cache.memoize(60)
 def gui_detail_node(node=''):
     node = node.strip()
     if not node:
@@ -139,5 +144,22 @@ def gui_new_node():
         argv["message"] = retVal["error"]
     else:
         return redirect(url_for(".gui_detail_node", node=retVal["data"]["node"]))
+
+    return render_template('note.html', **argv)
+
+@engine.route("/graph/remove/<string:node>")
+def gui_remove_node(node=''):
+    node = node.strip()
+    if not node:
+        abort(404)
+
+    retVal = _note_remove_handle({
+        "node" : node
+    })
+    if "error" in retVal:
+        argv["site_title"] = "Error"
+        argv["message"] = retVal["error"]
+    else:
+        return redirect(url_for(".gui_node", removed="done"))
 
     return render_template('note.html', **argv)

@@ -1,6 +1,6 @@
 {% macro page_navi(endpoint, navi) %}
     {% if navi %}
-        <nav class="page-navigation">
+        <div class="page-navigation">
         {% if navi.page > 4 %}
             <a href="{{ url_for(endpoint, **kwargs) }}">&lt;&lt;</a>
             <a href="{{ url_for(endpoint, page=(navi.page - 1), **kwargs) }}">&lt;</a>
@@ -35,7 +35,7 @@
                 <a href="{{ url_for(endpoint, page=navi.pages, **kwargs) }}"> {{ navi.pages }} </a>
             {% endif %}
         {% endif %}
-        </nav>
+        </div>
     {% endif %}
 {% endmacro %}
 <!DOCTYPE html>
@@ -92,7 +92,7 @@
 {% if notes %}
     <main>
         {% for note in notes %}
-        <div class="note" id="note-{{ note.node }}">
+        <div class="note{% if loop.last %} last_child{% endif %}" id="note-{{ note.node }}">
             {% if note.name %}
             <h3>&copy; <a href="{{ note.url }}" target="detail_source">{{ note.name }}</a></h3>
             {% endif %}
@@ -100,21 +100,22 @@
                 {{ the_excerpt(note.content) }}
             </blockquote>
             <p>
-                <time datetime="{{ note.timestamp | safe }}">{{ note.timestamp | the_time }}</time>
+                <span>
+                    <a href="{{ url_for(".gui_remove_node", node=note.node) }}" class="remove">Remove</a>
+                    <time datetime="{{ note.timestamp | safe }}">{{ note.timestamp | the_time }}</time>
+                </span>
                 <a href="{{ url_for(".gui_detail_node",node=note.node) }}" target="detail_note">&rarr;</a>
             </p>
         </div>
         {% endfor %}
         {% if navi %}
-            <div class="navi">
-                {% if endpoint and endpoint == "recents" %}
-                    page_navi(".gui_recent_node", navi)
-                {% elif endpoint and endpoint == "hits" %}
-                    page_navi(".gui_hit_node", navi)
-                {% else %}
-                    page_navi(".gui_node", navi)
-                {%endif %}
-            </div>
+            {% if endpoint and endpoint == "recents" %}
+                {{ page_navi(".gui_recent_node", navi) }}
+            {% elif endpoint and endpoint == "hits" %}
+                {{ page_navi(".gui_hit_node", navi) }}
+            {% else %}
+                {{ page_navi(".gui_node", navi) }}
+            {%endif %}
         {% endif %}
     </main>
 {% endif %}

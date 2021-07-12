@@ -13,6 +13,10 @@ class Configuration(Config):
     JSON_AS_ASCII = False
     JSONIFY_PRETTYPRINT_REGULAR = False
 
+    MINIFY_HTML = True
+
+    CACHE_TYPE = "simple"
+
     SQLALCHEMY_DATABASE_URI = "sqlite:///{}".format(os.path.join(SQLALCHEMY_DATABASE_PATH, "notes.db"))
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_ECHO = False

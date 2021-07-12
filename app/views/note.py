@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from app import engine
+from app import engine, cache
 from flask import Response, jsonify, request
 from .endpoint import get_handler
 
@@ -80,6 +80,7 @@ def remove_node(endpoint=""):
 
 @engine.route("/api/query", methods=["GET","POST"])
 @engine.route("/api/<string:endpoint>/query", methods=["GET","POST"])
+@cache.memoize(20)
 def query_node(endpoint=""):
     endpoint = endpoint.strip()
     if not endpoint:
@@ -107,6 +108,7 @@ def query_node(endpoint=""):
 
 @engine.route("/api/recents", methods=["GET","POST"])
 @engine.route("/api/<string:endpoint>/recents", methods=["GET","POST"])
+@cache.memoize(20)
 def recent_node(endpoint=""):
     endpoint = endpoint.strip()
     if not endpoint:
@@ -134,6 +136,7 @@ def recent_node(endpoint=""):
 
 @engine.route("/api/hits", methods=["GET","POST"])
 @engine.route("/api/<string:endpoint>/hits", methods=["GET","POST"])
+@cache.memoize(20)
 def hit_node(endpoint=""):
     endpoint = endpoint.strip()
     if not endpoint:
