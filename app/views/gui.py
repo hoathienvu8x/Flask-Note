@@ -2,7 +2,8 @@
 
 from app import engine, cache
 from flask import render_template, abort, request, redirect, url_for
-from .endpoint import _note_query_handle, _note_recents_handle, _note_hits_handle, _note_api_handle
+from .endpoint import _note_query_handle, _note_recents_handle, \
+_note_hits_handle, _note_api_handle, _note_remove_handle
 from .note import _get_request
 def get_list_pages(page, pages):
     start = page - 2
@@ -143,5 +144,22 @@ def gui_new_node():
         argv["message"] = retVal["error"]
     else:
         return redirect(url_for(".gui_detail_node", node=retVal["data"]["node"]))
+
+    return render_template('note.html', **argv)
+
+@engine.route("/graph/remove/<string:node>")
+def gui_remove_node(node=''):
+    node = node.strip()
+    if not node:
+        abort(404)
+
+    retVal = _note_remove_handle({
+        "node" : node
+    })
+    if "error" in retVal:
+        argv["site_title"] = "Error"
+        argv["message"] = retVal["error"]
+    else:
+        return redirect(url_for(".gui_node", removed="done"))
 
     return render_template('note.html', **argv)

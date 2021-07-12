@@ -100,7 +100,10 @@
                 {{ the_excerpt(note.content) }}
             </blockquote>
             <p>
-                <time datetime="{{ note.timestamp | safe }}">{{ note.timestamp | the_time }}</time>
+                <span>
+                    <a href="{{ url_for(".gui_remove_node", node=note.node) }}" class="remove">Remove</a>
+                    <time datetime="{{ note.timestamp | safe }}">{{ note.timestamp | the_time }}</time>
+                </span>
                 <a href="{{ url_for(".gui_detail_node",node=note.node) }}" target="detail_note">&rarr;</a>
             </p>
         </div>

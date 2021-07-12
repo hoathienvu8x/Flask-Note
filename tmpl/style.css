@@ -206,6 +206,27 @@ main, article {
     justify-content: space-between;
     align-items: center;
 }
+.note > p > span {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+}
+a.remove {
+    font-size:0;
+    display:inline-block;
+    padding:0 5px;
+}
+a.remove:before {
+    width:24px;
+    height:24px;
+    display:block;
+    background-size:100%;
+    background-color:transparent;
+    background-repeat:no-repeat;
+    content:'';
+    vertical-align: middle;
+    background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"><path fill="rgb(244, 67, 54)" d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z" /></svg>');    
+}
 .note time {
     color:#999;
     font-size:small;
