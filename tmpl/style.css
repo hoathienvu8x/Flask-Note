@@ -119,7 +119,7 @@ nav a.actived::after {
     background-color: #fff;
     position: absolute;
     bottom: 100%;
-    right: 5%;
+    right: 0;
     z-index: 2;
 }
 nav input[type="checkbox"] {
@@ -198,7 +198,7 @@ main, article {
 .note h3 {
     color: #0072aa;
 }
-main .note:last-child {
+.last_child {
     border-bottom-color:transparent;
 }
 .note > p {
@@ -209,6 +209,23 @@ main .note:last-child {
 .note time {
     color:#999;
     font-size:small;
+}
+.page-navigation {
+    padding: 20px 0;
+    font-size:0;
+}
+.page-navigation a, .page-navigation span {
+    display: inline-block;
+    padding: 5px 15px;
+    background-color: #eee;
+    border-radius: 3px;
+    text-align: center;
+    font-size: medium;
+    margin: 0 5px;
+}
+.page-navigation span, .page-navigation a:hover {
+    color: #fff;
+    background-color: #076DB6;
 }
 figure{
     font-size:0;
