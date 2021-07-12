@@ -48,7 +48,7 @@ def gui_node(page=1):
     navi = None
     if "total_pages" in retVal:
         if retVal["total_pages"] > 1:
-            navi = get_list_pages(restVal["page"], retVal["total_pages"])
+            navi = get_list_pages(retVal["page"], retVal["total_pages"])
 
     argv["navi"] = navi
     argv["page"] = page
