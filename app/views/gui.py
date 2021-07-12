@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from app import engine
+from app import engine, cache
 from flask import render_template, abort, request, redirect, url_for
 from .endpoint import _note_query_handle, _note_recents_handle, _note_hits_handle, _note_api_handle
 from .note import _get_request
@@ -27,6 +27,7 @@ def get_list_pages(page, pages):
 
 @engine.route("/graph/")
 @engine.route("/graph/page/<int:page>/")
+@cache.memoize(20)
 def gui_node(page=1):
     argv = {
         "site_title": "Simple Flask Note"
@@ -57,6 +58,7 @@ def gui_node(page=1):
 
 @engine.route("/graph/recents/")
 @engine.route("/graph/recents/page/<int:page>/")
+@cache.memoize(20)
 def gui_recent_node(page=1):
     argv = {
         "site_title": "Simple Flask Note"
@@ -82,6 +84,7 @@ def gui_recent_node(page=1):
 
 @engine.route("/graph/hits/")
 @engine.route("/graph/hits/page/<int:page>/")
+@cache.memoize(20)
 def gui_hit_node(page=1):
     argv = {
         "site_title": "Simple Flask Note"
@@ -106,6 +109,7 @@ def gui_hit_node(page=1):
     return render_template('note.html', **argv)
 
 @engine.route("/note/<string:node>/")
+@cache.memoize(60)
 def gui_detail_node(node=''):
     node = node.strip()
     if not node:

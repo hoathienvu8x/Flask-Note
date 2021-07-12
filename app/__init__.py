@@ -4,6 +4,7 @@ import os
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_htmlmin import HTMLMIN
+from flask_caching import Cache
 
 engine = Flask("app")
 
@@ -13,5 +14,6 @@ engine.config.from_object(Configuration)
 
 db = SQLAlchemy(engine,session_options={"autoflush": False})
 htmlmin = HTMLMIN(engine)
+cache = Cache(engine)
 
 from .views import *
