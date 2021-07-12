@@ -41,4 +41,4 @@ def the_time(d):
 
 @engine.template_filter('markdown')
 def neomarkdown(markdown_content):
-    return Markup(markdown.markdown(markdown_content, extensions=['tables',FigureCaption()]))
+    return Markup(markdown.markdown(markdown_content, extensions=['tables','codehilite','fenced_code',FigureCaption()]))

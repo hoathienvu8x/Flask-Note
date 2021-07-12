@@ -103,7 +103,7 @@ img, video {
     margin: 0 auto;
 }
 p, blockquote, article div,
-h1, h2, h3, h4, h5, h6 {
+h1, h2, h3, h4, h5, h6, pre {
     line-height:1.8;
     font-size:1.1em;
     margin:22px 0;
@@ -147,10 +147,11 @@ td {
     border-bottom:1px solid #d0d0d0;
     padding:6px 20px;
 }
-pre {
+pre > code {
     padding: 12px;
     background-color: #f6f6f6;
     border-radius: 3px;
+    display:block;
 }
 p > code {
     background-color:#e4e6e8;
