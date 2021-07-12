@@ -39,6 +39,11 @@ def the_time(d):
         return "{} hours ago".format(hours)
     return d.strftime("%d/%m/%Y @%H:%M")
 
+@engine.context_processor
+def inject_now():
+    from datetime import datetime
+    return {'now': datetime.utcnow()}
+
 @engine.template_filter('markdown')
 def neomarkdown(markdown_content):
     return Markup(markdown.markdown(markdown_content, extensions=['tables','codehilite','fenced_code',FigureCaption()]))
