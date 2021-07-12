@@ -49,9 +49,40 @@
 </head>
 <body>
 <nav>
+    <div>
     <a href="{% if page and page > 1 %}{{ url_for(".gui_node",page=page) }}{% else %}{{ url_for(".gui_node") }}{% endif %}" id="notes"{% if endpoint and endpoint == "notes" %} class="actived"{% endif %}>Notes</a>
     <a href="{% if page and page > 1 %}{{ url_for(".gui_recent_node",page=page) }}{% else %}{{ url_for(".gui_recent_node") }}{% endif %}" id="recents"{% if endpoint and endpoint == "recents" %} class="actived"{% endif %}>Recents</a>
     <a href="{% if page and page > 1 %}{{ url_for(".gui_hit_node",page=page) }}{% else %}{{ url_for(".gui_hit_node") }}{% endif %}" id="hits"{% if endpoint and endpoint == "hits" %} class="actived"{% endif %}>Hits</a>
+    </div>
+    <div>
+        <label for="search_note">Search</label>
+        <input type="checkbox" id="search_note">
+        <div class="popup search_note">
+            <form action="{{ url_for(".gui_node") }}" method="get">
+                <input type="keyword" name="s" value="" placeholder="Keywords..." />
+                <button type="submit">Search</button>
+            </form>
+        </div>
+        <label for="new_note">New</label>
+        <input type="checkbox" id="new_note">
+        <div class="popup new_note">
+            <form action="{{ url_for(".gui_new_node") }}" method="post">
+                <p>
+                    <input type="text" name="name" value="" placeholder="Name" />
+                    <textarea name="content" placeholder="Content"></textarea>
+                    <input type="text" name="url" value="" placeholder="URL" />
+                </p>
+                <p>
+                    <select name="status">
+                        <option value="pending">Pending</option>
+                        <option value="publish">Publish</option>
+                        <option value="draft">Draft</option>
+                    </select>
+                    <button type="submit">Add Note</button>
+                </p>
+            </form>
+        </div>
+    </div>
 </nav>
 {% if message %}
 <div class="message">
@@ -95,5 +126,8 @@
         {{ note.content | markdown }}
     </article>
 {% endif %}
+<footer>
+    &copy; {% if now.year > 2021 %}2021 - {{ now.year % 100 }}{% else %}{{ now.year }}{% endif %} Flask Note
+</footer>
 </body>
 </html>

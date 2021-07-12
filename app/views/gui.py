@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
 from app import engine
-from flask import render_template, abort
-from .endpoint import _note_query_handle, _note_recents_handle, _note_hits_handle
-
+from flask import render_template, abort, request, redirect, url_for
+from .endpoint import _note_query_handle, _note_recents_handle, _note_hits_handle, _note_api_handle
+from .note import _get_request
 def get_list_pages(page, pages):
     start = page - 2
     if start <= 0:
@@ -34,11 +34,16 @@ def gui_node(page=1):
     if page <= 0:
         page = 1
     limit = 10
-    retVal = _note_query_handle({
+    args = {
         "page": str(page),
         "limit": str(limit),
         "fields":"node,content,name,url,timestamp"
-    })
+    }
+    if request.args.get("s","").strip():
+        args["action"] = "search"
+        args["s"] = request.args.get("s","").strip()
+
+    retVal = _note_query_handle(args)
     navi = None
     if "total_pages" in retVal:
         if retVal["total_pages"] > 1:
@@ -119,5 +124,20 @@ def gui_detail_node(node=''):
         argv["note"] = retVal["data"]
         if "name" in retVal["data"] and retVal["data"]["name"].strip():
             argv["site_title"] = retVal["data"]["name"]
+
+    return render_template('note.html', **argv)
+
+@engine.route("/graph/new", methods=["GET","POST"])
+def gui_new_node():
+    args = _get_request(request)
+    retVal = _note_api_handle(args)
+    argv = {
+        "site_title": "Simple Flask Note"
+    }
+    if "error" in retVal:
+        argv["site_title"] = "Error"
+        argv["message"] = retVal["error"]
+    else:
+        return redirect(url_for(".gui_detail_node", node=retVal["data"]["node"]))
 
     return render_template('note.html', **argv)
