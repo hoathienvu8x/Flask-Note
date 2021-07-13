@@ -16,7 +16,13 @@ def _no_accent(s):
         s = re.sub(specials[i],' ', s)
     return s
 
+def _remove_markdown_inline_tags(s):
+    s = re.sub(r'^\!\[[^\)]+\)',' ',s)
+    s = re.sub(r'^\[[^\)]+\)',' ',s)
+    return s
+
 def _the_short_content(s, length=160):
+    s = _remove_markdown_inline_tags(s)
     s = _no_accent(s)
     s = re.sub(r'[\W_]+', ' ', s)
     s = re.sub(r' +',r' ',s)
