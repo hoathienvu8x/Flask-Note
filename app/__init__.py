@@ -16,4 +16,6 @@ db = SQLAlchemy(engine,session_options={"autoflush": False})
 htmlmin = HTMLMIN(engine)
 cache = Cache(engine)
 
+API_KEY = ""
+
 from .views import *
