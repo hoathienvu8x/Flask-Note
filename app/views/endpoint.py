@@ -96,11 +96,35 @@ def _get_note_optional_args(args):
 
     return (page, limit, state, fields)
 
+def _note_check_api_key(args=None):
+    if args is None:
+        return {
+            "error": "Missing API KEY."
+        }
+
+    api_key = args.get("key","").strip()
+    if not api_key:
+        return {
+            "error": "Missing API KEY."
+        }
+
+    from app import API_KEY
+    if api_key != API_KEY:
+        return {
+            "error":"API KEY is not compared"
+        }
+
+    return None
+
 def _note_api_handle(args=None):
     if args is None:
         return {
             "data":[]
         }
+
+    ok = _note_check_api_key(args)
+    if ok is not None:
+        return ok
 
     id = args.get("id", "").strip()
     content = args.get("content","").strip()
@@ -174,6 +198,10 @@ def _note_remove_handle(args=None):
             "data":[]
         }
 
+    ok = _note_check_api_key(args)
+    if ok is not None:
+        return ok
+
     if args.get("id","").strip():
         id = args.get("id",-1, int)
         if id <= 0:
@@ -226,6 +254,10 @@ def _note_query_handle(args=None):
         return {
             "data":[]
         }
+
+    ok = _note_check_api_key(args)
+    if ok is not None:
+        return ok
 
     action = args.get("action","get").strip()
     if not action:
@@ -293,6 +325,10 @@ def _note_recents_handle(args=None):
             "data":[]
         }
 
+    ok = _note_check_api_key(args)
+    if ok is not None:
+        return ok
+
     page, limit, state, fields = _get_note_optional_args(args)
 
     since = datetime.now() - timedelta(hours=24)
@@ -313,6 +349,10 @@ def _note_hits_handle(args=None):
         return {
             "data":[]
         }
+
+    ok = _note_check_api_key(args)
+    if ok is not None:
+        return ok
 
     page, limit, state, fields = _get_note_optional_args(args)
 

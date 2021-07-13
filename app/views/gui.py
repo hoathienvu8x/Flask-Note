@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 
-from app import engine, cache
+from app import engine, cache, API_KEY
 from flask import render_template, abort, request, redirect, url_for
 from .endpoint import _note_query_handle, _note_recents_handle, \
 _note_hits_handle, _note_api_handle, _note_remove_handle
 from .note import _get_request
+
 def get_list_pages(page, pages):
     start = page - 2
     if start <= 0:
@@ -70,7 +71,8 @@ def gui_recent_node(page=1):
     retVal = _note_recents_handle({
         "page": str(page),
         "limit": str(limit),
-        "fields":"node,content,name,url,timestamp"
+        "fields":"node,content,name,url,timestamp",
+        "key":API_KEY
     })
     navi = None
     if "total_pages" in retVal:
@@ -96,7 +98,8 @@ def gui_hit_node(page=1):
     retVal = _note_hits_handle({
         "page": str(page),
         "limit": str(limit),
-        "fields":"node,content,name,url,timestamp"
+        "fields":"node,content,name,url,timestamp",
+        "key":API_KEY
     })
     navi = None
     if "total_pages" in retVal:
@@ -117,7 +120,8 @@ def gui_detail_node(node=''):
         abort(404)
     retVal = _note_query_handle({
         "node":node,
-        "fields":"node,content,name,url,timestamp"
+        "fields":"node,content,name,url,timestamp",
+        "key":API_KEY
     })
     argv = {
         "site_title": "Simple Flask Note"
@@ -153,9 +157,13 @@ def gui_remove_node(node=''):
     if not node:
         abort(404)
 
-    retVal = _note_remove_handle({
-        "node" : node
-    })
+    args = _get_request(request)
+    from .endpoint import _note_check_api_key
+    retVal = _note_check_api_key(args)
+    if retVal is None:
+        retVal = _note_remove_handle({
+            "node" : node
+        })
     if "error" in retVal:
         argv["site_title"] = "Error"
         argv["message"] = retVal["error"]
