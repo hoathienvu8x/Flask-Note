@@ -130,5 +130,38 @@
 <footer>
     &copy; {% if now.year > 2021 %}2021 - {{ now.year % 100 }}{% else %}{{ now.year }}{% endif %} Flask Note
 </footer>
+<script>
+document.addEventListener("DOMContentLoaded", function(e) {
+    function a(b) {
+        var c = new Image();
+        c.onload = c.onerror = function () {
+            b(c.height == 2);
+        };
+        c.src = 'data:image/webp;base64,UklGRjoAAABXRUJQVlA4IC4AAACyAgCdASoCAAIALmk0mk0iIiIiIgBoSygABc6WWgAA/veff/0PP8bA//LwYAAA';
+    };
+    a(function(support) {
+        document.querySelectorAll('img').forEach(function(e) {
+            var s = e.getAttribute('data-src');
+            if (support) {
+                s = e.getAttribute('data-webp');
+                if (!s) {
+                    s = e.getAttribute('data-src');
+                }
+            }
+            if (s) {
+                var i = new Image();
+                i.onload = function() {
+                    if (!! e.parent) {
+                        e.parent.replaceChild(i, e);
+                    } else {
+                        e.src = s;
+                    }
+                };
+                e.src = s;
+            }
+        })  
+    });
+}, false);
+</script>
 </body>
 </html>
