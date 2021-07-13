@@ -40,7 +40,8 @@ def gui_node(page=1):
     args = {
         "page": str(page),
         "limit": str(limit),
-        "fields":"node,content,name,url,timestamp"
+        "fields":"node,content,name,url,timestamp",
+        "key":API_KEY
     }
     if request.args.get("s","").strip():
         args["action"] = "search"

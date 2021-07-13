@@ -59,7 +59,7 @@
         <input type="checkbox" id="search_note">
         <div class="popup search_note">
             <form action="{{ url_for(".gui_node") }}" method="get">
-                <input type="keyword" name="s" value="" placeholder="Keywords..." />
+                <input type="keyword" name="s" value="" placeholder="Keywords..." autocomplete="off" autocorrect="off" />
                 <button type="submit">Search</button>
             </form>
         </div>
@@ -68,9 +68,9 @@
         <div class="popup new_note">
             <form action="{{ url_for(".gui_new_node") }}" method="post">
                 <p>
-                    <input type="text" name="name" value="" placeholder="Name" />
+                    <input type="text" name="name" value="" placeholder="Name" autocomplete="off" autocorrect="off" />
                     <textarea name="content" placeholder="Content"></textarea>
-                    <input type="text" name="url" value="" placeholder="URL" />
+                    <input type="text" name="url" value="" placeholder="URL" autocomplete="off" autocorrect="off" />
                 </p>
                 <p>
                     <select name="status">

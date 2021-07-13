@@ -34,9 +34,12 @@ a {
 a:hover {
     color: #0090c0;
 }
-nav,main, article, footer {
+nav,main, article, footer,.message {
     max-width:800px;
     margin:0 auto;
+}
+.message {
+    color:brown;
 }
 footer {
     text-align:center;
