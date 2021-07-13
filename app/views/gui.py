@@ -132,7 +132,7 @@ def gui_detail_node(node=''):
         argv["message"] = retVal["error"]
     else:
         argv["note"] = retVal["data"]
-        if "name" in retVal["data"] and retVal["data"]["name"].strip():
+        if "name" in retVal["data"] and retVal["data"]["name"] is not None and retVal["data"]["name"].strip():
             argv["site_title"] = retVal["data"]["name"]
 
     return render_template('note.html', **argv)
