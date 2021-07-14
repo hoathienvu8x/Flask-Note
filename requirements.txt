@@ -5,3 +5,6 @@ markdown
 Pygments==2.4.2
 Flask-HTMLmin
 flask-caching
+Flask-GraphQL
+graphene
+graphene-sqlalchemy

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
 
 __all__ = [
-    "note", "gui", "jinja"
+    "note", "gui", "jinja", "graph"
 ]
